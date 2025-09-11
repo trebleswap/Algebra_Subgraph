@@ -283,6 +283,7 @@ type Transaction @entity(immutable: false) {
   # gas used during txn execution
   gasLimit: BigInt!
   gasPrice: BigInt!
+  index: BigInt!
   # derived values
   mints: [Mint!]! @derivedFrom(field: "transaction")
   burns: [Burn!]! @derivedFrom(field: "transaction")
@@ -322,6 +323,8 @@ type Mint @entity(immutable: true) {
   tickLower: BigInt!
   # upper tick of the position
   tickUpper: BigInt!
+  reserves0: BigDecimal!
+  reserves1: BigDecimal!
   # order within the txn
   logIndex: BigInt
 }
@@ -355,6 +358,8 @@ type Burn @entity(immutable: true) {
   tickLower: BigInt!
   # upper tick of position
   tickUpper: BigInt!
+  reserves0: BigDecimal!
+  reserves1: BigDecimal!
   # position within the transactions
   logIndex: BigInt
 }
@@ -390,6 +395,8 @@ type Swap @entity(immutable: true) {
   price: BigInt!
   # the tick after the swap
   tick: BigInt!
+  reserves0: BigDecimal!
+  reserves1: BigDecimal!
   # index within the txn
   logIndex: BigInt
 }
