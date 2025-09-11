@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { Bundle, Burn, Factory, Mint, Pool, Swap, Tick, PoolPosition, Plugin, Token, PoolFeeData } from '../types/schema'
-import { PluginConfig, Pool as PoolABI } from '../types/Factory/Pool'
+import { PluginConfig} from '../types/Factory/Pool'
 import { BigDecimal, BigInt} from '@graphprotocol/graph-ts'
 
 import {
@@ -128,7 +128,7 @@ export function handleMint(event: MintEvent): void {
   mint.reserves0 = pool.totalValueLockedToken0
   mint.reserves1 = pool.totalValueLockedToken1
   mint.logIndex = event.logIndex
-  pool.lastMintIndex = pool.txCount
+  pool.lastMintIndex = event.logIndex
   
   // tick entities
   let lowerTickIdx = event.params.bottomTick

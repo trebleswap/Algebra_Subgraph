@@ -3,11 +3,12 @@ import {
   Collect,
   IncreaseLiquidity,
   DecreaseLiquidity,
-  Transfer
+  Transfer,
+  NonfungiblePositionManager
 } from '../types/NonfungiblePositionManager/NonfungiblePositionManager'
 import { Pool, Position, PositionSnapshot, PositionTransferCache, Token, Mint} from '../types/schema'
-import { ZERO_ADDRESS, ZERO_BD, ZERO_BI} from '../utils/constants'
-import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts'
+import { ZERO_BD, ZERO_BI} from '../utils/constants'
+import { BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { convertTokenToDecimal, loadTransaction } from '../utils'
 
 
@@ -29,9 +30,23 @@ function createPositionIfNeccessary(event: ethereum.Event, tokenId: BigInt, pool
     position.token0 = pool.token0
     position.token1 = pool.token1
     let transaction = loadTransaction(event)
-    let mint = Mint.load(transaction.id.toString() + '#' + pool.lastMintIndex.toString())!
-    position.tickLower = position.pool.concat('#').concat(mint.tickLower.toString())
-    position.tickUpper = position.pool.concat('#').concat(mint.tickUpper.toString())
+
+    let mint = Mint.load(transaction.id.toString() + '#' + (pool.lastMintIndex).toString())
+    if(mint !== null) {
+      position.tickLower = position.pool.concat('#').concat(mint.tickLower.toString())
+      position.tickUpper = position.pool.concat('#').concat(mint.tickUpper.toString())
+    } else {
+      let contract = NonfungiblePositionManager.bind(event.address)
+      let positionCall = contract.try_positions(tokenId)
+
+      // the following call reverts in situations where the position is minted
+      // and deleted in the same block 
+      if (!positionCall.reverted) {
+        let positionResult = positionCall.value
+        position.tickLower = position.pool.concat('#').concat(positionResult.value5.toString())
+        position.tickUpper = position.pool.concat('#').concat(positionResult.value6.toString())
+      }
+    }
     position.liquidity = ZERO_BI
     position.depositedToken0 = ZERO_BD
     position.depositedToken1 = ZERO_BD
@@ -46,6 +61,7 @@ function createPositionIfNeccessary(event: ethereum.Event, tokenId: BigInt, pool
   }
   return position
 }
+
 function savePositionSnapshot(position: Position, event: ethereum.Event): void {
   
   let positionSnapshot = new PositionSnapshot(position.id.concat('#').concat(event.block.number.toString()))
