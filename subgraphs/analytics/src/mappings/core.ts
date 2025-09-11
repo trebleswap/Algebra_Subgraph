@@ -125,7 +125,7 @@ export function handleMint(event: MintEvent): void {
   factory.totalValueLockedUSD = factory.totalValueLockedMatic.times(bundle.maticPriceUSD)
 
   let transaction = loadTransaction(event)
-  let mint = new Mint(transaction.id.toString() + '#' + pool.txCount.toString())
+  let mint = new Mint(transaction.id.toString() + '#' + event.logIndex.toString())
   mint.transaction = transaction.id
   mint.timestamp = transaction.timestamp
   mint.pool = pool.id
@@ -140,6 +140,9 @@ export function handleMint(event: MintEvent): void {
   mint.amountUSD = amountUSD
   mint.tickLower = BigInt.fromI32(event.params.bottomTick)
   mint.tickUpper = BigInt.fromI32(event.params.topTick)
+  mint.reserves0 = pool.totalValueLockedToken0
+  mint.reserves1 = pool.totalValueLockedToken1
+  mint.logIndex = event.logIndex
   pool.lastMintIndex = pool.txCount
   
   // tick entities
@@ -267,7 +270,7 @@ export function handleBurn(event: BurnEvent): void {
 
   // burn entity
   let transaction = loadTransaction(event)
-  let burn = new Burn(transaction.id + '#' + pool.txCount.toString())
+  let burn = new Burn(transaction.id + '#' + event.logIndex.toString())
   burn.transaction = transaction.id
   burn.timestamp = transaction.timestamp
   burn.pool = pool.id
@@ -281,6 +284,9 @@ export function handleBurn(event: BurnEvent): void {
   burn.amountUSD = amountUSD
   burn.tickLower = BigInt.fromI32(event.params.bottomTick)
   burn.tickUpper = BigInt.fromI32(event.params.topTick)
+  burn.reserves0 = pool.totalValueLockedToken0
+  burn.reserves1 = pool.totalValueLockedToken1
+  burn.logIndex = event.logIndex
 
   // tick entities
   let lowerTickId = poolAddress + '#' + BigInt.fromI32(event.params.bottomTick).toString()
@@ -466,7 +472,7 @@ export function handleSwap(event: SwapEvent): void {
 
   // create Swap event
   let transaction = loadTransaction(event)
-  let swap = new Swap(transaction.id + '#' + pool.txCount.toString())
+  let swap = new Swap(transaction.id + '#' + event.logIndex.toString())
   swap.transaction = transaction.id
   swap.timestamp = transaction.timestamp
   swap.pool = pool.id
@@ -481,6 +487,9 @@ export function handleSwap(event: SwapEvent): void {
   swap.amountUSD = amountTotalUSDTracked
   swap.tick = BigInt.fromI32(event.params.tick as i32)
   swap.price = event.params.price
+  swap.reserves0 = pool.totalValueLockedToken0
+  swap.reserves1 = pool.totalValueLockedToken1
+  swap.logIndex = event.logIndex
 
   // interval data
   let algebraDayData = updateAlgebraDayData(event)
