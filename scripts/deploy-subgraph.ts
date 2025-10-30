@@ -20,6 +20,7 @@ interface DeploymentConfig {
   accessToken?: string;
   nodeUrl?: string;
   ipfsUrl?: string;
+  headers?: Record<string, string>;
 }
 
 function getNetworkFromSubgraph(subgraph: string): string | null {
@@ -98,6 +99,18 @@ function deploySubgraph(
         if (config.ipfsUrl) {
           customCommand += ` --ipfs ${config.ipfsUrl}`;
         }
+        
+        // Add custom headers if provided
+        if (config.headers) {
+          const headersString = JSON.stringify(config.headers);
+          customCommand += ` --headers '${headersString}'`;
+        }
+        
+        // Add access token if provided (for custom nodes that use access-token instead of headers)
+        if (config.accessToken) {
+          customCommand += ` --access-token ${config.accessToken}`;
+        }
+        
         customCommand += ` ${config.subgraphName}`;
         deployCommand = customCommand;
         break;
@@ -135,11 +148,15 @@ function main() {
   
   # Deploy to custom endpoint
   yarn deploy-subgraph analytics custom my-subgraph --node http://localhost:8020 --ipfs http://localhost:5001 --access-token YOUR_TOKEN
+  
+  # Deploy to custom endpoint with API key header
+  yarn deploy-subgraph analytics custom my-subgraph --node http://localhost:8020 --ipfs http://localhost:5001 --header x-api-key=YOUR_API_KEY
 
-� Options:
+📋 Options:
   --access-token <token>     Access token for authentication
-  --node <url>        Graph node URL (required for custom target)
-  --ipfs <url>        IPFS URL (optional for custom target)
+  --node <url>              Graph node URL (required for custom target)
+  --ipfs <url>              IPFS URL (optional for custom target)
+  --header <key>=<value>    Custom header (can be used multiple times)
 
 �💡 The network will be automatically detected from the existing subgraph.yaml file.
    If subgraph.yaml doesn't exist, run: yarn prepare-network <network> first.
@@ -170,7 +187,8 @@ function main() {
   const config: DeploymentConfig = {
     target: target as DeploymentTarget,
     subgraphName,
-    accessToken: process.env.GRAPH_ACCESS_TOKEN
+    accessToken: process.env.GRAPH_ACCESS_TOKEN,
+    headers: {}
   };
   
   for (let i = 0; i < options.length; i++) {
@@ -187,6 +205,19 @@ function main() {
       case '--ipfs':
         config.ipfsUrl = options[i + 1];
         i++; // Skip next argument as it's the IPFS URL
+        break;
+      case '--header':
+        const headerValue = options[i + 1];
+        if (headerValue && headerValue.includes('=')) {
+          const [key, ...valueParts] = headerValue.split('=');
+          const value = valueParts.join('='); // Handle values that might contain '='
+          if (config.headers) {
+            config.headers[key] = value;
+          }
+        } else {
+          console.warn(`⚠️  Invalid header format: ${headerValue}. Expected format: key=value`);
+        }
+        i++; // Skip next argument as it's the header value
         break;
       default:
         console.warn(`⚠️  Unknown option: ${option}`);
