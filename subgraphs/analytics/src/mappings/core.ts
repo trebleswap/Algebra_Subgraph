@@ -24,6 +24,7 @@ import {
   Mint as MintEvent,
   Swap as SwapEvent,
   CommunityFee,
+  CommunityVault,
   TickSpacing,
   Plugin as PluginEvent,
   BurnFee,
@@ -575,6 +576,14 @@ export function handleSetCommunityFee(event: CommunityFee): void {
     pool.save() 
   }
 
+}
+
+export function handleSetCommunityVault(event: CommunityVault): void {
+  let pool = Pool.load(event.address.toHexString())
+  if (pool){
+    pool.communityVault = event.params.newCommunityVault
+    pool.save()
+  }
 }
 
 export function handleCollect(event: Collect): void {
