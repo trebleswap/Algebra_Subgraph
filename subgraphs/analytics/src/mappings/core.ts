@@ -338,6 +338,7 @@ export function handleSwap(event: SwapEvent): void {
   let swapFee = pool.fee
   if(swapFeeCache.overrideFee > ZERO_BI){
     swapFee = swapFeeCache.overrideFee
+    pool.overrideFee = swapFeeCache.overrideFee
   }  
 
   let pluginFee = swapFeeCache.pluginFee

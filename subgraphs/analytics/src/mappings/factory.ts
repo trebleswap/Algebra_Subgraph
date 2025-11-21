@@ -151,6 +151,7 @@ function createPool(
   pool.token0 = token0.id
   pool.token1 = token1.id
   pool.fee = BigInt.fromI32(100)
+  pool.overrideFee = BigInt.fromI32(0)
   pool.pluginConfig = 0
   pool.createdAtTimestamp = timestamp
   pool.createdAtBlockNumber = blockNumber
