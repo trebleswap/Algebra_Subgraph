@@ -15,7 +15,7 @@ export const MINIMUM_NATIVE_LOCKED = BigDecimal.fromString('0.05')
 export const WHITELIST_TOKENS: string[] = [
   '0x4200000000000000000000000000000000000006', // WETH
   '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
-  '0xb96450dcb16e4a30b999cb5f4087bae9c0ffac4e', // TREB
+  '0xdd2fc771ddab2b787aedfd100a67d8a4754a380c', // TREB
   '0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b'  // VIRTUAL
 ]
 
